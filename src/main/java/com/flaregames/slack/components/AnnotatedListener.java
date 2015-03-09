@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import com.atlassian.confluence.event.events.content.ContentEvent;
 import com.atlassian.confluence.event.events.content.blogpost.BlogPostCreateEvent;
 import com.atlassian.confluence.event.events.content.page.PageCreateEvent;
 import com.atlassian.confluence.event.events.content.page.PageUpdateEvent;
@@ -48,20 +49,24 @@ public class AnnotatedListener implements DisposableBean, InitializingBean {
 
    @EventListener
    public void blogPostCreateEvent(BlogPostCreateEvent event) {
-      sendMessages(event.getBlogPost(), "new blog post");
+      sendMessages(event, event.getBlogPost(), "new blog post");
    }
 
    @EventListener
    public void pageCreateEvent(PageCreateEvent event) {
-      sendMessages(event.getPage(), "new page created");
+      sendMessages(event, event.getPage(), "new page created");
    }
 
    @EventListener
    public void pageUpdateEvent(PageUpdateEvent event) {
-      sendMessages(event.getPage(), "page updated");
+      sendMessages(event, event.getPage(), "page updated");
    }
 
-   private void sendMessages(AbstractPage page, String action) {
+   private void sendMessages(ContentEvent event, AbstractPage page, String action) {
+      if (event.isSuppressNotifications()) {
+         LOGGER.info("Suppressing notification for {}.", page.getTitle());
+         return;
+      }
       SlackMessage message = getMessage(page, action);
       for (String channel : getChannels(page)) {
          sendMessage(channel, message);
