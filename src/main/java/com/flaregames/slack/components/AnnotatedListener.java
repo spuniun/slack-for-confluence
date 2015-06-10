@@ -1,7 +1,6 @@
 package com.flaregames.slack.components;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import in.ashwanthkumar.slack.webhook.Slack;
 import in.ashwanthkumar.slack.webhook.SlackMessage;
 
@@ -21,8 +20,8 @@ import com.atlassian.confluence.event.events.content.page.PageCreateEvent;
 import com.atlassian.confluence.event.events.content.page.PageUpdateEvent;
 import com.atlassian.confluence.pages.AbstractPage;
 import com.atlassian.confluence.pages.TinyUrl;
+import com.atlassian.confluence.user.ConfluenceUser;
 import com.atlassian.confluence.user.PersonalInformationManager;
-import com.atlassian.confluence.user.UserAccessor;
 import com.atlassian.event.api.EventListener;
 import com.atlassian.event.api.EventPublisher;
 import com.atlassian.plugin.webresource.UrlMode;
@@ -36,13 +35,11 @@ public class AnnotatedListener implements DisposableBean, InitializingBean {
    private final EventPublisher             eventPublisher;
    private final ConfigurationManager       configurationManager;
    private final PersonalInformationManager personalInformationManager;
-   private final UserAccessor               userAccessor;
 
-   public AnnotatedListener(EventPublisher eventPublisher, ConfigurationManager configurationManager, PersonalInformationManager personalInformationManager,
-         UserAccessor userAccessor, WebResourceUrlProvider webResourceUrlProvider) {
+   public AnnotatedListener(EventPublisher eventPublisher, ConfigurationManager configurationManager,
+         PersonalInformationManager personalInformationManager, WebResourceUrlProvider webResourceUrlProvider) {
       this.eventPublisher = checkNotNull(eventPublisher);
       this.configurationManager = checkNotNull(configurationManager);
-      this.userAccessor = checkNotNull(userAccessor);
       this.personalInformationManager = checkNotNull(personalInformationManager);
       this.webResourceUrlProvider = checkNotNull(webResourceUrlProvider);
    }
@@ -82,8 +79,7 @@ public class AnnotatedListener implements DisposableBean, InitializingBean {
    }
 
    private SlackMessage getMessage(AbstractPage page, String action) {
-      String username = isNullOrEmpty(page.getLastModifierName()) ? page.getCreatorName() : page.getLastModifierName();
-      final User user = userAccessor.getUser(username);
+      ConfluenceUser user = page.getLastModifier() != null ? page.getLastModifier() : page.getCreator();
       SlackMessage message = new SlackMessage();
       message = appendPageLink(message, page);
       message = message.text(" - " + action + " by ");
@@ -91,7 +87,8 @@ public class AnnotatedListener implements DisposableBean, InitializingBean {
    }
 
    private void sendMessage(String channel, SlackMessage message) {
-      LOGGER.info("Sending to {} on channel {} with message {}.", configurationManager.getWebhookUrl(), channel, message.toString());
+      LOGGER.info("Sending to {} on channel {} with message {}.", configurationManager.getWebhookUrl(), channel,
+            message.toString());
       try {
          new Slack(configurationManager.getWebhookUrl()).displayName("Confluence").sendToChannel(channel).push(message);
       }
@@ -104,8 +101,8 @@ public class AnnotatedListener implements DisposableBean, InitializingBean {
       if (null == user) {
          return message.text("unknown user");
       }
-      return message.link(webResourceUrlProvider.getBaseUrl(UrlMode.ABSOLUTE) + "/" + personalInformationManager.getOrCreatePersonalInformation(user).getUrlPath(),
-            user.getFullName());
+      return message.link(webResourceUrlProvider.getBaseUrl(UrlMode.ABSOLUTE) + "/"
+            + personalInformationManager.getOrCreatePersonalInformation(user).getUrlPath(), user.getFullName());
    }
 
    private SlackMessage appendPageLink(SlackMessage message, AbstractPage page) {
