@@ -1,0 +1,21 @@
+Create Incoming WebHook within Slack
+-
+Create a new "Incoming WebHooks" integration within Slack.
+
+Copy the "Webhook URL" for configuration within Confluence.
+-
+Choose an arbitrary channel. You will configure which channels notifications will be posted to later on within Confluence.
+
+You can use "Confluence" for the Name and http://i58.tinypic.com/16m6g5k.jpg for the Icon.
+
+---
+
+Configure Slack within Confluence Admin
+-
+​Paste the previously copied "Webhook URL" from Slack and hit "Save".
+
+---
+
+Configure Channels within Confluence Space Admin
+-
+​Within the Confluence Space Admin, enter which channels you'd like notifications to be posted.

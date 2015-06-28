@@ -90,7 +90,7 @@ public class AnnotatedListener implements DisposableBean, InitializingBean {
       LOGGER.info("Sending to {} on channel {} with message {}.", configurationManager.getWebhookUrl(), channel,
             message.toString());
       try {
-         new Slack(configurationManager.getWebhookUrl()).displayName("Confluence").sendToChannel(channel).push(message);
+         new Slack(configurationManager.getWebhookUrl()).sendToChannel(channel).push(message);
       }
       catch (IOException e) {
          LOGGER.error("Error when sending Slack message", e);
