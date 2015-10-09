@@ -98,7 +98,7 @@
     <repositories>
         <repository>
             <id>atlassian-public</id>
-            <url>https://maven.atlassian.com/repository/public</url>
+            <url>https://maven.atlassian.com/repository/public/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -108,7 +108,7 @@
     <pluginRepositories>
         <pluginRepository>
             <id>atlassian-plugins</id>
-            <url>https://maven.atlassian.com/repository/public</url>
+            <url>https://maven.atlassian.com/repository/public/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
